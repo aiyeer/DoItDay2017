@@ -54,3 +54,4 @@ rebel.xml
 /sdk/.project
 .checkstyle
 /modules/bin/
+*.project
