@@ -11,3 +11,6 @@ mvn spring-boot:run
 #Run front end
 cd /frontend/src/main/frontend
 npm start
+
+
+#Run npm install d3-ng2-service --save
