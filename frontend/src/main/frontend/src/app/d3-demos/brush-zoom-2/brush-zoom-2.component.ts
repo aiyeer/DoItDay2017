@@ -13,6 +13,7 @@ import * as d3Array from "d3-array";
 import * as d3Axis from "d3-axis";
 
 import {AppService} from '../../services/app.service';
+import { Analysis } from './Analysis';
 
 
 @Component({
@@ -25,7 +26,7 @@ import {AppService} from '../../services/app.service';
 })
 export class BrushZoom2Component implements OnInit {
 
-  allAnalysis: any = {};
+  allAnalysis: Analysis[] = [];
 
   private width: number;
   private height: number;
