@@ -75,7 +75,7 @@ export class BrushZoom2Component implements OnInit {
           .call(d3Axis.axisBottom(this.x));
     this.g.append("g")
           .attr("class", "axis axis--y")
-          .call(d3Axis.axisLeft(this.y).ticks(10, "%"))
+          .call(d3Axis.axisLeft(this.y).ticks(1))
           .append("text")
           .attr("class", "axis-title")
           .attr("transform", "rotate(-90)")

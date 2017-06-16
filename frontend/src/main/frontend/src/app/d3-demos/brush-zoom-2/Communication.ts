@@ -3,6 +3,6 @@ export interface AnalysisRouting {
   fromId: string;
   toId: string;
   canCommunicate:boolean;
-  canCommunicate:string;
+  message:string;
   lastModified:Date;
 }
