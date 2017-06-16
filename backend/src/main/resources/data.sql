@@ -85,7 +85,16 @@ VALUES ('a0c81463-a9d1-455d-a221-ec76d24c145c', 'e469c007-a267-42df-93bb-be7e63f
 
 -- Notification data --
 INSERT INTO NOTIFICATION (TYPE, LEVEL, MESSAGE, TIME_STAMP) 
-VALUES ('NODES', 'WARNING', 'The node manager sf-seaanjana2.sea.qclab.test is offline. ID: 3f7b4626-2ccd-40a1-acd6-72dec114c227', '2017-06-12 06:20:28');
+VALUES ('NODES', 'WARNING', 'The node manager sf-seaanjana2.sea.qclab.test is offline. ID: 3f7b4626-2ccd-40a1-acd6-72dec114c227', '2017-06-09 06:20:28');
+
+INSERT INTO NOTIFICATION (TYPE, LEVEL, MESSAGE, TIME_STAMP) 
+VALUES ('NODES', 'WARNING', 'The supervisor bjanumpa-p50.na.tibco.com could not communicate with the node manager sf-seabharath1.sea.qclab.test at 6/15/17 11:46 AM. ', '2017-06-17 06:20:28');
+
+INSERT INTO NOTIFICATION (TYPE, LEVEL, MESSAGE, TIME_STAMP) 
+VALUES ('DEPLOYMENT', 'FAILED', 'The Deployment for the 7.10 package', '2017-06-10 06:20:28');
+
+INSERT INTO NOTIFICATION (TYPE, LEVEL, MESSAGE, TIME_STAMP) 
+VALUES ('NODES', 'FAILED', 'The node manager 3f7b4626-2ccd-40a1-acd6-72dec114c227 failed', '2017-06-10 06:20:28');
 
 
 --Schedule update data--
