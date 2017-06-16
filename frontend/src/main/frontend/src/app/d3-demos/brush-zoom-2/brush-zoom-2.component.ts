@@ -27,6 +27,7 @@ import { Analysis } from './Analysis';
 export class BrushZoom2Component implements OnInit {
 
   allAnalysis: Analysis[] = [];
+  color = ['black', 'blue', 'brown', 'red'];
 
   private width: number;
   private height: number;
@@ -65,7 +66,7 @@ export class BrushZoom2Component implements OnInit {
     this.x = d3Scale.scaleBand().rangeRound([0, this.width]).padding(0.1);
     this.y = d3Scale.scaleLinear().rangeRound([this.height, 0]);
     this.x.domain(this.allAnalysis.map((d) => d.name));
-    this.y.domain([0, d3Array.max(this.allAnalysis, (d) => d.instancesCount)]);
+    this.y.domain([0, d3Array.max(this.allAnalysis, (d) => d.userCount/d.instancesCount)]);
   }
 
   private drawAxis() {
@@ -82,7 +83,7 @@ export class BrushZoom2Component implements OnInit {
           .attr("y", 6)
           .attr("dy", "0.71em")
           .attr("text-anchor", "end")
-          .text("Frequency");
+          .text("User Count/ Instances Count");
   }
 
   private drawBars() {
@@ -91,9 +92,10 @@ export class BrushZoom2Component implements OnInit {
           .enter().append("rect")
           .attr("class", "bar")
           .attr("x", (d) => this.x(d.name) )
-          .attr("y", (d) => this.y(d.instancesCount) )
+          .attr("y", (d) => this.y(d.userCount/d.instancesCount) )
           .attr("width", this.x.bandwidth())
-          .attr("height", (d) => this.height - this.y(d.instancesCount) );
+          .attr("height", (d) => this.height - this.y(d.userCount/d.instancesCount))
+          .style("fill", (d) => this.color[d.userCount/d.instancesCount]);
   }
 
 
