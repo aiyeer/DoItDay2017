@@ -15,6 +15,8 @@ import * as d3Axis from "d3-axis";
 import {AppService} from '../../services/app.service';
 import { Analysis } from './Analysis';
 
+import { IntervalObservable } from 'rxjs/observable/IntervalObservable';
+
 
 @Component({
   selector: 'app-brush-zoom-2',
@@ -42,6 +44,13 @@ export class BrushZoom2Component implements OnInit {
 
   ngOnInit() {
     this.getAnalysis();
+    this.autoRefresh();
+  }
+
+  autoRefresh() {
+    IntervalObservable.create(10000).subscribe(() => {
+      this.getAnalysis();
+    });
   }
 
   private initSvg() {
