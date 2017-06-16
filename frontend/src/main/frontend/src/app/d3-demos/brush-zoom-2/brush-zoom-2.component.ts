@@ -54,11 +54,10 @@ export class BrushZoom2Component implements OnInit {
   getAnalysis() {
     this.appService.getAllAnalysis().subscribe(data => {
       this.allAnalysis = data;
-      console.log(this.allAnalysis);
       this.initSvg();
-    this.initAxis();
-    this.drawAxis();
-    this.drawBars();
+      this.initAxis();
+      this.drawAxis();
+      this.drawBars();
     });
   }
 
