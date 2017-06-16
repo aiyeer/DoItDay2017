@@ -4,21 +4,20 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jdriven.ng2boot.model.Analysis;
 import com.jdriven.ng2boot.model.Communication;
 import com.jdriven.ng2boot.model.Node;
 import com.jdriven.ng2boot.model.Notification;
+import com.jdriven.ng2boot.model.ScheduledUpdates;
 import com.jdriven.ng2boot.model.ServiceInstances;
 import com.jdriven.ng2boot.repository.AnalysisRepository;
 import com.jdriven.ng2boot.repository.CommunicationRespository;
 import com.jdriven.ng2boot.repository.NodeRepository;
 import com.jdriven.ng2boot.repository.NotificationRepository;
+import com.jdriven.ng2boot.repository.ScheduledUpdatesRepository;
 import com.jdriven.ng2boot.repository.ServiceInstanceRespository;
 
 @RestController
@@ -39,6 +38,9 @@ public class MainController {
 	
 	@Autowired
 	private CommunicationRespository communicationRespository;
+	
+	@Autowired
+	private ScheduledUpdatesRepository scheduledUpdatesRepository;
 	
 	@RequestMapping(value="/getAllAnalysis", produces= "application/json")
 	public List<Analysis> getAllAnalysis() {
@@ -64,5 +66,11 @@ public class MainController {
 	public List<Communication> getAllCommunications() {
 		return communicationRespository.findAll();
 	}
+	
+	@RequestMapping("/getScheduledUpdates")
+	public List<ScheduledUpdates> getScheduledUpdates() {
+		return scheduledUpdatesRepository.findAll();
+	}
+	
 	
 }
