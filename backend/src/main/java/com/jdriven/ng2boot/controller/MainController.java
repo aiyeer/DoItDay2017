@@ -12,6 +12,7 @@ import com.jdriven.ng2boot.model.Communication;
 import com.jdriven.ng2boot.model.Node;
 import com.jdriven.ng2boot.model.Notification;
 import com.jdriven.ng2boot.model.ScheduledUpdates;
+import com.jdriven.ng2boot.model.ScheduledUpdatesDTO;
 import com.jdriven.ng2boot.model.ServiceInstances;
 import com.jdriven.ng2boot.repository.AnalysisRepository;
 import com.jdriven.ng2boot.repository.CommunicationRespository;
@@ -68,8 +69,34 @@ public class MainController {
 	}
 	
 	@RequestMapping("/getScheduledUpdates")
-	public List<ScheduledUpdates> getScheduledUpdates() {
-		return scheduledUpdatesRepository.findAll();
+	public ScheduledUpdatesDTO getScheduledUpdates() {
+		List<ScheduledUpdates> suList = scheduledUpdatesRepository.findAll();
+		ScheduledUpdatesDTO suDto = new ScheduledUpdatesDTO();
+		int disabledRules = 0;
+		int enabledRules = 0;
+		int activeRules = 0;
+		int failedRules = 0;
+		int inProgressRules = 0;
+		for (ScheduledUpdates scheduledUpdates : suList) {
+			if("DISABLED".equalsIgnoreCase(scheduledUpdates.getRuleStatus())) {
+				disabledRules++;
+			} else if("ENABLED".equalsIgnoreCase(scheduledUpdates.getRuleStatus())) {
+				enabledRules++;
+				if("FAILED".equalsIgnoreCase(scheduledUpdates.getLastExecutionStatus())) {
+					failedRules++;
+				} else if("SUCCESS".equalsIgnoreCase(scheduledUpdates.getLastExecutionStatus())) {
+					activeRules++;
+				} else if("INPROGESS".equalsIgnoreCase(scheduledUpdates.getLastExecutionStatus())) {
+					inProgressRules++;
+				}
+			}
+		}
+		suDto.setDisabledRules(disabledRules);
+		suDto.setEnabledRules(enabledRules);
+		suDto.setActiveRules(activeRules);
+		suDto.setFailedRules(failedRules);
+		suDto.setInProgressRules(inProgressRules);
+		return suDto;
 	}
 	
 	

@@ -21,7 +21,7 @@ import { Node } from './Node';
   template: `
     <h1>{{title}}</h1>
     <h2>{{subtitle}}</h2>
-    <svg width="500" height="500"></svg>
+    <svg class="linechart" width="500" height="500"></svg>
   `
 })
 export class DragZoom2Component implements OnInit {
@@ -49,14 +49,14 @@ export class DragZoom2Component implements OnInit {
     this.appService.getAllNodes().subscribe(data => {
       this.allNodes = data
       this.initSvg();
-    this.initAxis();
-    this.drawAxis();
-    this.drawLine();
+      this.initAxis();
+      this.drawAxis();
+      this.drawLine();
     });
   }
 
   private initSvg() {
-    this.svg = d3.select("svg")
+    this.svg = d3.select("svg.linechart")
                  .append("g")
                  .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");;
   }
@@ -73,7 +73,10 @@ export class DragZoom2Component implements OnInit {
     this.svg.append("g")
           .attr("class", "axis axis--x")
           .attr("transform", "translate(0," + this.height + ")")
-          .call(d3Axis.axisBottom(this.x));
+          .call(d3Axis.axisBottom(this.x))
+          .append("text")
+          .attr("class", "axis-title")
+          .text("Cpu Usage (%)");
 
     this.svg.append("g")
           .attr("class", "axis axis--y")
@@ -84,7 +87,7 @@ export class DragZoom2Component implements OnInit {
           .attr("y", 6)
           .attr("dy", ".71em")
           .style("text-anchor", "end")
-          .text("Price ($)");
+          .text("MemoryAvailable (MB)");
   }
 
   private drawLine() {
