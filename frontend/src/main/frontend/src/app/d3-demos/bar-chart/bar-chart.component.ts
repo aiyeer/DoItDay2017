@@ -1,31 +1,21 @@
-/**
- * This component is an adaptation of the "Brush & Zoom II" Example provided by
- * Mike Bostock at https://bl.ocks.org/mbostock/f48fcdb929a620ed97877e4678ab15e6
- */
-
-import { Component, ElementRef, NgZone, OnDestroy, OnInit } from '@angular/core';
-
+import { Component, OnInit } from '@angular/core';
 
 import * as d3 from 'd3-selection';
 import * as d3Scale from "d3-scale";
-import * as d3Shape from "d3-shape";
 import * as d3Array from "d3-array";
 import * as d3Axis from "d3-axis";
 
-import {AppService} from '../../services/app.service';
-
+import { STATISTICS } from './shared/data';
 
 @Component({
-  selector: 'app-brush-zoom-2',
+  selector: 'app-bar-chart',
   template: `
     <h1>{{title}}</h1>
     <h2>{{subtitle}}</h2>
-    <svg width="500" height="500"></svg>
+    <svg width="960" height="500"></svg>
   `
 })
-export class BrushZoom2Component implements OnInit {
-
-  allAnalysis: any = {};
+export class AppComponent implements OnInit {
 
   private width: number;
   private height: number;
@@ -36,10 +26,13 @@ export class BrushZoom2Component implements OnInit {
   private svg: any;
   private g: any;
 
-  constructor(private appService : AppService) {}
+  constructor() {}
 
   ngOnInit() {
-    this.getAnalysis();
+    this.initSvg()
+    this.initAxis();
+    this.drawAxis();
+    this.drawBars();
   }
 
   private initSvg() {
@@ -50,22 +43,11 @@ export class BrushZoom2Component implements OnInit {
                      .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");;
   }
 
-  getAnalysis() {
-    this.appService.getAllAnalysis().subscribe(data => {
-      this.allAnalysis = data;
-      console.log(this.allAnalysis);
-      this.initSvg();
-    this.initAxis();
-    this.drawAxis();
-    this.drawBars();
-    });
-  }
-
   private initAxis() {
     this.x = d3Scale.scaleBand().rangeRound([0, this.width]).padding(0.1);
     this.y = d3Scale.scaleLinear().rangeRound([this.height, 0]);
-    this.x.domain(this.allAnalysis.map((d) => d.name));
-    this.y.domain([0, d3Array.max(this.allAnalysis, (d) => d.instancesCount)]);
+    this.x.domain(STATISTICS.map((d) => d.letter));
+    this.y.domain([0, d3Array.max(STATISTICS, (d) => d.frequency)]);
   }
 
   private drawAxis() {
@@ -87,14 +69,13 @@ export class BrushZoom2Component implements OnInit {
 
   private drawBars() {
     this.g.selectAll(".bar")
-          .data(this.allAnalysis)
+          .data(STATISTICS)
           .enter().append("rect")
           .attr("class", "bar")
-          .attr("x", (d) => this.x(d.name) )
-          .attr("y", (d) => this.y(d.instancesCount) )
+          .attr("x", (d) => this.x(d.letter) )
+          .attr("y", (d) => this.y(d.frequency) )
           .attr("width", this.x.bandwidth())
-          .attr("height", (d) => this.height - this.y(d.instancesCount) );
+          .attr("height", (d) => this.height - this.y(d.frequency) );
   }
-
 
 }
