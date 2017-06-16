@@ -7,19 +7,19 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.jdriven.ng2boot.dao.AnalysisDao;
 import com.jdriven.ng2boot.model.Analysis;
+import com.jdriven.ng2boot.repository.AnalysisRepository;
 
 @RestController
 @EnableAutoConfiguration
 public class MainController {
 	
 	@Autowired
-	private AnalysisDao analysisDao;
+	private AnalysisRepository analysisRepository;
 	
 	@RequestMapping("/getAllAnalysis")
 	public List<Analysis> getAllAnalysis() {
-		return analysisDao.findAll();
+		return analysisRepository.findAll();
 	}
 
 }
