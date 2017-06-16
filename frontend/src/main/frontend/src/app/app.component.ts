@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import 'rxjs/add/operator/map';
+import {AppService} from './services/app.service';
 
 @Component({
   selector: 'app-root',
@@ -7,4 +9,18 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'D3 Angular Demo';
+
+  data: any = {};
+
+  constructor(private appService: AppService) {
+
+  	this.getAnalysis();
+
+  }
+
+  getAnalysis() {
+	  this.appService.getAllAnalysis().subscribe(data => {
+	  	this.data = data
+	  })
+  }
 }

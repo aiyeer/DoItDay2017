@@ -2,8 +2,10 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 
 import { D3Service } from 'd3-ng2-service';
-
+import {AppService} from './services/app.service';
 import { AppComponent } from './app.component';
+
+import { HttpModule } from '@angular/http';
 import { BrushZoom2Component } from './d3-demos/brush-zoom-2/brush-zoom-2.component';
 import { DragZoom2Component } from './d3-demos/drag-zoom-2/drag-zoom-2.component';
 import { VoronoiSpirals3Component } from './d3-demos/voronoi-spirals-3/voronoi-spirals-3.component';
@@ -22,10 +24,12 @@ import { WrapperVoronoiSpirals3Component } from './d3-demos/wrapper-voronoi-spir
     WrapperVoronoiSpirals3Component
   ],
   imports: [
-    BrowserModule
+    BrowserModule,
+    HttpModule
   ],
   providers: [
-    D3Service
+    D3Service,
+    AppService
   ],
   bootstrap: [AppComponent]
 })
