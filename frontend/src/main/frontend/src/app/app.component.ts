@@ -12,23 +12,54 @@ import { IntervalObservable } from 'rxjs/observable/IntervalObservable';
 export class AppComponent {
  	title = 'D3 Angular Demo';
 
- 	data: any = {};
- 	n: number = 0;
+ 	allAnalysis: any = {};
+  allNodes: any = {};
+  allNotifications: any = {};
+  allInstances: any = {};
+  allCommunications: any = {};
 
-  	constructor(private appService: AppService) { 
-  		this.autoRefresh();
-  	}
+  constructor(private appService: AppService) { 
+  	this.autoRefresh();
+  }
 
-  	autoRefresh() {
-  		IntervalObservable.create(10000).subscribe(() => {
-    		console.log('hi');
-    		this.getAnalysis();
-    	});
-  	}
+  autoRefresh() {
+  	IntervalObservable.create(10000).subscribe(() => {
+    	console.log('hi');
+    	this.getAnalysis();
+      this.getNodes();
+      this.getNotifications();
+      this.getInstances();
+      this.getCommunications();
+    });
+  }
 
 	getAnalysis() {
-	  	this.appService.getAllAnalysis().subscribe(data => {
-	  		this.data = data
-	  	});
-  	}
+	  this.appService.getAllAnalysis().subscribe(data => {
+	  	this.allAnalysis = data
+	  });
+  }
+
+  getNodes() {
+    this.appService.getAllNodes().subscribe(data => {
+      this.allNodes = data
+    });
+  }
+
+  getNotifications() {
+    this.appService.getAllNotifications().subscribe(data => {
+      this.allNotifications = data
+    });
+  }
+
+  getInstances() {
+    this.appService.getAllInstances().subscribe(data => {
+      this.allInstances = data
+    });
+  }
+
+  getCommunications() {
+    this.appService.getAllCommunications().subscribe(data => {
+      this.allCommunications = data
+    });
+  }
 }
