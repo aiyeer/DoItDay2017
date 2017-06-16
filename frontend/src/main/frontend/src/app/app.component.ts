@@ -19,6 +19,7 @@ export class AppComponent {
   allNotifications: any = {};
   allInstances: any = {};
   allCommunications: any = {};
+  allUpdates: any = {};
 
   constructor(private appService: AppService) { 
   	
@@ -32,6 +33,7 @@ export class AppComponent {
       this.getNotifications();
       this.getInstances();
       this.getCommunications();
+      this.getScheduledUpdates();
     });
   }
 
@@ -63,5 +65,11 @@ export class AppComponent {
     this.appService.getAllCommunications().subscribe(data => {
       this.allCommunications = data
     });
+  }
+
+  getScheduledUpdates() {
+    this.appService.getScheduledUpdates().subscribe(data => {
+      this.allUpdates = data
+      });
   }
 }

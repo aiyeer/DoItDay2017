@@ -33,4 +33,9 @@ export class AppService{
   		.map((res: Response) => res.json())
  	}
 
+  getScheduledUpdates() {
+    return this.http.get(this.analysisUrl + "getScheduledUpdates")
+    .map((res: Response) => res.json())
+  }
+
 }

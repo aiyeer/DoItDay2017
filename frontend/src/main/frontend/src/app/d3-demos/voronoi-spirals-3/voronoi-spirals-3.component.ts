@@ -1,121 +1,80 @@
-/**
- * This component is an adaptation of the "Voronoi Spirals III" Example provided by
- * Mike Bostock at https://bl.ocks.org/mbostock/c677b9bb3c926ba13f3a902acb006b0c
- */
+import { Component, OnInit } from '@angular/core';
 
-import { Component, ElementRef, NgZone, OnDestroy, OnInit } from '@angular/core';
+import * as d3 from 'd3-selection';
+import * as d3Scale from "d3-scale";
+import * as d3Shape from "d3-shape";
 
-import { D3Service, D3, RGBColor, Selection, Timer, VoronoiPolygon } from 'd3-ng2-service';
+import {AppService} from '../../services/app.service';
+import { ScheduledUpdatesCount } from './ScheduledUpdatesCount';
 
 @Component({
-  selector: 'app-voronoi-spirals-3',
-  template: '<canvas width="400" height="400"></canvas>'
+    selector: "app-voronoi-spirals-3",
+    template: `
+    <h1>{{title}}</h1>
+    <h2>{{subtitle}}</h2>
+    <svg class="barchart" width="500" height="500"></svg>
+  `
 })
-export class VoronoiSpirals3Component implements OnInit, OnDestroy {
 
-  private d3: D3;
-  private parentNativeElement: any;
-  private timer: Timer;
+export class VoronoiSpirals3Component implements OnInit {
 
-  constructor(element: ElementRef, private ngZone: NgZone, d3Service: D3Service) {
-    this.d3 = d3Service.getD3();
-    this.parentNativeElement = element.nativeElement;
-  }
+  allUpdates: any = {};
+  private margin = {top: 20, right: 20, bottom: 30, left: 50};
+  private width: number;
+  private height: number;
+  private radius: number;
 
-  ngOnDestroy() {
-    this.ngZone.runOutsideAngular(() => {
-      this.timer.stop();
-    });
+  private arc: any;
+  private labelArc: any;
+  private pie: any;
+  private color: any;
+  private svg: any;
+
+
+  constructor(private appService : AppService) {
+    this.width = 900 - this.margin.left - this.margin.right ;
+    this.height = 500 - this.margin.top - this.margin.bottom;
+    this.radius = Math.min(this.width, this.height) / 2;
   }
 
   ngOnInit() {
-    let d3 = this.d3;
-    let d3ParentElement: Selection<HTMLElement, any, null, undefined>;
-    let canvas: HTMLCanvasElement;
-    let context: CanvasRenderingContext2D;
-    let width: number;
-    let height: number;
-    let sites: Array<[number, number]>;
-    let cells: Array<VoronoiPolygon<[number, number]>>;
-    let formatHex: (n: number) => string;
-    let colors: Array<RGBColor>;
-
-    function drawCell(cell: VoronoiPolygon<[number, number]>): void {
-      context.moveTo(cell[0][0], cell[0][1]);
-      for (let i = 1, n = cell.length; i < n; ++i) {
-        context.lineTo(cell[i][0], cell[i][1]);
-      }
-      context.closePath();
-    }
-
-    function distance(a: [number, number], b: [number, number]): number {
-      let dx = a[0] - b[0], dy = a[1] - b[1];
-      return Math.sqrt(dx * dx + dy * dy);
-    }
-
-    if (this.parentNativeElement !== null) {
-
-      d3ParentElement = d3.select(this.parentNativeElement);
-      canvas = d3ParentElement.select<HTMLCanvasElement>('canvas').node();
-
-      width = canvas.width;
-      height = canvas.height;
-
-      context = canvas.getContext('2d');
-
-      sites = d3.range(100).map(function (): [number, number] { return [Math.random() * width, Math.random() * height]; });
-
-      cells = d3.voronoi().size([width, height]).polygons(sites);
-      formatHex = d3.format('02x');
-
-      colors = d3.range(256)
-        .map(d3.scaleSequential(d3.interpolateRainbow).domain([0, 255]))
-        .map(function (c) { return d3.rgb(c); });
-
-      for (let i = 0; i < 256; ++i) {
-        context.beginPath();
-        cells.forEach(function (cell: VoronoiPolygon<[number, number]>) {
-          drawCell(cell);
-          let p0 = cell.shift();
-          let p1 = cell[0];
-          let t = Math.min(0.5, 4 / distance(p0, p1));
-          let p2: [number, number] = [p0[0] * (1 - t) + p1[0] * t, p0[1] * (1 - t) + p1[1] * t];
-          cell.push(p2);
-        });
-        context.fillStyle = '#' + formatHex(i) + '0000';
-        context.fill();
-      }
-
-      let source = context.getImageData(0, 0, width, height).data,
-        targetBuffer = context.createImageData(width, height),
-        target = targetBuffer.data;
-
-      for (let i = 0, y = 0; y < height; ++y) {
-        for (let x = 0; x < width; ++x, i += 4) {
-          target[i + 0] =
-            target[i + 1] =
-            target[i + 2] =
-            target[i + 3] = 255;
-        }
-      }
-
-      context.clearRect(0, 0, width, height);
-
-      this.ngZone.runOutsideAngular(() => {
-        this.timer = d3.timer(function (elapsed) {
-          for (let i = 0, y = 0; y < height; ++y) {
-            for (let x = 0; x < width; ++x, i += 4) {
-              let c = colors[Math.floor(source[i] + elapsed / 10) % 256];
-              target[i + 0] = c.r;
-              target[i + 1] = c.g;
-              target[i + 2] = c.b;
-            }
-          }
-          context.putImageData(targetBuffer, 0, 0);
-        });
-      });
-
-    }
+    this.getAnalysis();
   }
 
+  getAnalysis() {
+    this.appService.getScheduledUpdates().subscribe(data => {
+      this.allUpdates = data
+      this.initSvg();
+      this.drawPie();
+    });
+  }
+
+  private initSvg() {
+    this.color = d3Scale.scaleOrdinal()
+                        .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+    this.arc = d3Shape.arc()
+                      .outerRadius(this.radius - 10)
+                      .innerRadius(0);
+    this.labelArc = d3Shape.arc()
+                           .outerRadius(this.radius - 40)
+                           .innerRadius(this.radius - 40);
+    this.pie = d3Shape.pie()
+                      .sort(null)
+                      .value((d: any) => d.population);
+    this.svg = d3.select("svg")
+                 .append("g")
+                 .attr("transform", "translate(" + this.width / 2 + "," + this.height / 2 + ")");;
+  }
+
+  private drawPie() {
+    let g = this.svg.selectAll(".arc")
+                    .data(this.pie(this.allUpdates))
+                    .enter().append("g")
+                    .attr("class", "arc");
+    g.append("path").attr("d", this.arc)
+                    .style("fill", (d: any) => this.color(d.data.rules) );
+    g.append("text").attr("transform", (d: any) => "translate(" + this.labelArc.centroid(d) + ")")
+                    .attr("dy", ".35em")
+                    .text((d: any) => d.data.rules);
+  }
 }
