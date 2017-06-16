@@ -21,16 +21,31 @@
     </div>
     
     <div class="col-md-4">
-      Column 3
+
     </div>
 </div>
 
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6">
+        <div class="container">
+      <h4>Notifications</h4>
+      <div class="table table-hover">
+        <thead>
+          <tr>
+            <th>Message</th>
+            <th>Timestamp</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of allNotifications" 
+            [ngClass]="{'warning': item.level == 'WARNING', 
+            'info' : item.level == 'INFO', 'danger' : item.level == 'FAILED'}">
+            <th>{{item.message}}</th>
+            <th>{{item.timeStamp |  date: 'medium'}}</th>
+          </tr>
+        </tbody>
+      </div>
     </div>
-    <div class="col-md-4">
     </div>
-    <div class="col-md-4">
 
-    </div>
 </div>

@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import 'rxjs/add/operator/map';
 import {AppService} from './services/app.service';
 import { IntervalObservable } from 'rxjs/observable/IntervalObservable';
+
 
 @Component({
   selector: 'app-root',
@@ -9,14 +10,14 @@ import { IntervalObservable } from 'rxjs/observable/IntervalObservable';
   styleUrls: ['./app.component.css']
 })
 
-export class AppComponent {
+export class AppComponent implements OnInit {
 
 
  	title = 'D3 Angular Demo';
 
  	allAnalysis: any = {};
   allNodes: any = {};
-  allNotifications: any = {};
+  allNotifications: any [];
   allInstances: any = {};
   allCommunications: any = {};
 
@@ -24,6 +25,9 @@ export class AppComponent {
   	
   }
 
+  ngOnInit() {
+    this.getNotifications();
+  }
   autoRefresh() {
   	IntervalObservable.create(10000).subscribe(() => {
 
@@ -49,7 +53,8 @@ export class AppComponent {
 
   getNotifications() {
     this.appService.getAllNotifications().subscribe(data => {
-      this.allNotifications = data
+      this.allNotifications = data;
+      console.log(this.allNotifications);
     });
   }
 
