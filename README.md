@@ -14,3 +14,8 @@ npm start
 
 
 #Run npm install d3-ng2-service --save
+
+#Install bootstrap in node_modules
+Navigate to frontend/src/main/frontend
+
+npm i bootstrap@next --save
