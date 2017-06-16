@@ -1,116 +1,102 @@
 /**
- * This component is an adaptation of the "Drag & Zoom II" Example provided by
- * Mike Bostock at https://bl.ocks.org/mbostock/3127661b6f13f9316be745e77fdfb084
- *
- * The implementation has been modified to illustrate the use of inputs to control
- * the layout of the D3 visualization.
+ * This component is an adaptation of the "Brush & Zoom II" Example provided by
+ * Mike Bostock at https://bl.ocks.org/mbostock/f48fcdb929a620ed97877e4678ab15e6
  */
 
-import { Component, ElementRef, Input, OnChanges, OnDestroy, OnInit, SimpleChange } from '@angular/core';
+import { Component, ElementRef, NgZone, OnDestroy, OnInit } from '@angular/core';
 
-import { D3Service, D3, D3DragEvent, D3ZoomEvent, Selection } from 'd3-ng2-service';
-import { phyllotaxis, PhyllotaxisPoint } from '../shared';
+
+import * as d3 from 'd3-selection';
+import * as d3Scale from "d3-scale";
+import * as d3Shape from "d3-shape";
+import * as d3Array from "d3-array";
+import * as d3Axis from "d3-axis";
+
+import {AppService} from '../../services/app.service';
+import { Node } from './Node';
 
 
 @Component({
   selector: 'app-drag-zoom-2',
-  template: '<svg></svg>'
+  template: `
+    <h1>{{title}}</h1>
+    <h2>{{subtitle}}</h2>
+    <svg width="500" height="500"></svg>
+  `
 })
-export class DragZoom2Component implements OnInit, OnChanges, OnDestroy {
+export class DragZoom2Component implements OnInit {
 
-  @Input() width: number = 400;
-  @Input() height: number = 400;
-  @Input() phylloRadius: number = 7;
-  @Input() pointRadius: number = 2;
+  allNodes: Node[] = [];
 
-  private d3: D3;
-  private parentNativeElement: any;
-  private d3Svg: Selection<SVGSVGElement, any, null, undefined>;
-  private d3G: Selection<SVGGElement, any, null, undefined>;
-  private points: PhyllotaxisPoint[];
+  private margin = {top: 20, right: 20, bottom: 30, left: 50};
+  private width: number;
+  private height: number;
+  private x: any;
+  private y: any;
+  private svg: any;
+  private line: d3Shape.Line<[number, number]>;
 
-  constructor(element: ElementRef, d3Service: D3Service) {
-    this.d3 = d3Service.getD3();
-    this.parentNativeElement = element.nativeElement;
-  }
-
-  ngOnChanges(changes: { [propKey: string]: SimpleChange }) {
-    if (
-      (changes['width'] && !changes['width'].isFirstChange()) ||
-      (changes['height'] && !changes['height'].isFirstChange()) ||
-      (changes['phylloRadius'] && !changes['phylloRadius'].isFirstChange()) ||
-      (changes['pointRadius'] && !changes['pointRadius'].isFirstChange())
-    ) {
-      if (this.d3Svg.empty && !this.d3Svg.empty()) {
-        this.changeLayout();
-      }
-    }
-
-  }
-
-  ngOnDestroy() {
-    if (this.d3Svg.empty && !this.d3Svg.empty()) {
-      this.d3Svg.selectAll('*').remove();
-    }
+  constructor(private appService : AppService) {
+    this.width = 900 - this.margin.left - this.margin.right ;
+    this.height = 500 - this.margin.top - this.margin.bottom;
   }
 
   ngOnInit() {
-    let d3 = this.d3;
-    let d3ParentElement: Selection<HTMLElement, any, null, undefined>;
-    let d3G: Selection<SVGGElement, any, null, undefined>;
-
-
-    function zoomed(this: SVGSVGElement) {
-      let e: D3ZoomEvent<SVGSVGElement, any> = d3.event;
-      d3G.attr('transform', e.transform.toString());
-    }
-
-    function dragged(this: SVGCircleElement, d: PhyllotaxisPoint) {
-      let e: D3DragEvent<SVGCircleElement, PhyllotaxisPoint, PhyllotaxisPoint> = d3.event;
-      d3.select(this).attr('cx', d.x = e.x).attr('cy', d.y = e.y);
-    }
-
-    if (this.parentNativeElement !== null) {
-
-
-      d3ParentElement = d3.select(this.parentNativeElement);
-
-      this.d3Svg = d3ParentElement.select<SVGSVGElement>('svg');
-
-      this.d3Svg.attr('width', this.width);
-      this.d3Svg.attr('height', this.height);
-
-      this.points = d3.range(2000).map(phyllotaxis(this.width, this.height, this.phylloRadius));
-
-      d3G = this.d3G = this.d3Svg.append<SVGGElement>('g');
-
-      this.d3G.selectAll<SVGCircleElement, any>('circle')
-        .data(this.points)
-        .enter().append<SVGCircleElement>('circle')
-        .attr('cx', function (d) { return d.x; })
-        .attr('cy', function (d) { return d.y; })
-        .attr('r', this.pointRadius)
-        .call(d3.drag<SVGCircleElement, PhyllotaxisPoint>().on('drag', dragged));
-
-      this.d3Svg.call(d3.zoom<SVGSVGElement, any>()
-        .scaleExtent([1 / 2, 8])
-        .on('zoom', zoomed));
-    }
-
+    this.getAnalysis();
   }
 
-  private changeLayout() {
-    this.d3Svg
-      .attr('width', this.width)
-      .attr('height', this.height);
-    this.points = this.d3.range(2000).map(phyllotaxis(this.width, this.height, this.phylloRadius));
-
-    this.d3G.selectAll<SVGCircleElement, PhyllotaxisPoint>('circle')
-      .data(this.points)
-      .attr('cx', function (d) { return d.x; })
-      .attr('cy', function (d) { return d.y; })
-      .attr('r', this.pointRadius);
-
+  getAnalysis() {
+    this.appService.getAllNodes().subscribe(data => {
+      this.allNodes = data
+      this.initSvg();
+    this.initAxis();
+    this.drawAxis();
+    this.drawLine();
+    });
   }
+
+  private initSvg() {
+    this.svg = d3.select("svg")
+                 .append("g")
+                 .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");;
+  }
+
+  private initAxis() {
+    this.x = d3Scale.scaleTime().range([0, this.width]);
+    this.y = d3Scale.scaleLinear().range([this.height, 0]);
+    this.x.domain(d3Array.extent(this.allNodes, (d) => d.cpuUsage ));
+    this.y.domain(d3Array.extent(this.allNodes, (d) => d.memoryAvailable ));
+  }
+
+  private drawAxis() {
+
+    this.svg.append("g")
+          .attr("class", "axis axis--x")
+          .attr("transform", "translate(0," + this.height + ")")
+          .call(d3Axis.axisBottom(this.x));
+
+    this.svg.append("g")
+          .attr("class", "axis axis--y")
+          .call(d3Axis.axisLeft(this.y))
+          .append("text")
+          .attr("class", "axis-title")
+          .attr("transform", "rotate(-90)")
+          .attr("y", 6)
+          .attr("dy", ".71em")
+          .style("text-anchor", "end")
+          .text("Price ($)");
+  }
+
+  private drawLine() {
+    this.line = d3Shape.line()
+                       .x( (d: any) => this.x(d.cpuUsage) )
+                       .y( (d: any) => this.y(d.memoryAvailable) );
+
+    this.svg.append("path")
+            .datum(this.allNodes)
+            .attr("class", "line")
+            .attr("d", this.line);
+  }
+
 
 }
